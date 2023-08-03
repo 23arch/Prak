@@ -1,0 +1,46 @@
+import paramiko
+import subprocess
+
+def establish_vnc_connection(host, username, password):
+    try:
+        # SSH-Verbindung zum Remote-Computer herstellen
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(host, username=username, password=password)
+
+        # Befehl zum Starten der VNC-Verbindung ausführen
+        _, stdout, _ = ssh.exec_command('vncserver -geometry 1280x800')
+        vnc_port = stdout.read().decode().strip().split(':')[-1]
+
+        return ssh, vnc_port
+    except Exception as e:
+        print("Fehler bei der Verbindung:", str(e))
+        return None, None
+
+def copy_file_via_vnc(ssh, vnc_port, source_file, dest_file):
+    try:
+        # Kopieren Sie die Datei von Ihrem Computer auf den Remote-Computer
+        subprocess.run(["vncviewer", f"{ssh.get_transport().getpeername()[0]}::{vnc_port}", "-password", "your_vnc_password", "-send", source_file])
+        
+        # Kopieren Sie die Datei vom Remote-Computer auf Ihren Computer
+        subprocess.run(["vncviewer", f"{ssh.get_transport().getpeername()[0]}::{vnc_port}", "-password", "your_vnc_password", "-get", dest_file])
+        
+        print("Datei erfolgreich kopiert!")
+    except Exception as e:
+        print("Fehler beim Kopieren der Datei:", str(e))
+
+if __name__ == "__main__":
+    remote_host = "remote_host_ip"
+    remote_username = "remote_username"
+    remote_password = "remote_password"
+    source_file = "path_to_local_file"
+    dest_file = "path_on_remote_server"
+
+    ssh, vnc_port = establish_vnc_connection(remote_host, remote_username, remote_password)
+
+    if ssh and vnc_port:
+        copy_file_via_vnc(ssh, vnc_port, source_file, dest_file)
+
+        # VNC-Verbindung und SSH-Verbindung schließen
+        ssh.exec_command(f'vncserver -kill :{vnc_port}')
+        ssh.close()

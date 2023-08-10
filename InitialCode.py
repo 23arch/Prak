@@ -29,7 +29,7 @@ def copy_file_via_vnc(vnc, vnc_port, source_file, dest_file):
 
 
 if __name__ == "__main__":
-    remote_host = "172.31.247.65"
+    remote_host = "172.31.247.144"
     remote_password = "center"
     source_file = "C:\\Users\\talha.yuecel\\Documents\\VTG_Export.xlsx"
     dest_file = "C:\\Users\\MDT\\Downloads\\"
@@ -38,9 +38,4 @@ if __name__ == "__main__":
     #center
     #C:\Users\Documents\VTG_Export.xlsx
     #C:\Users\MDT\Downloads
-
-    vnc_port = establish_vnc_connection(remote_host, remote_password)
-
-
-
 
